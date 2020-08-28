@@ -1,0 +1,54 @@
+function Agent(){ 
+    const gameState   = JSON.parse(localStorage.getItem('gameState'));
+    this.bitboard     = Agent.prototype.parsedGrid(gameState.grid);
+    const SIMULS      = 100;
+
+    var currentScore = 0;
+    var currentMove;
+    // console.log('New sim')
+    possibleMoves = Agent.prototype.possibleMoves(this.bitboard, lookup)
+    // console.log('Possible moves: ', possibleMoves)
+    for (const move of possibleMoves){
+        var moveBitboard = Agent.prototype.move(this.bitboard, move, lookup)[0]
+        // Simulate the single move
+        var score = 0
+        for (var itr = 0; itr < SIMULS; itr++){
+            score += Agent.prototype.simulate(moveBitboard, lookup)
+        };
+        score /= SIMULS;
+        // console.log(`Move ${move}, Score ${score}\n`);
+        if (score > currentScore){
+            currentScore = score;
+            currentMove  = move;
+        };
+    }; 
+    // console.log('Final move: ', currentMove)
+    Agent.prototype.outputMove(currentMove); 
+};  
+
+
+Agent.prototype.simulate = function(bitboard, lookup){
+    var possibleMoves = Agent.prototype.possibleMoves(bitboard, lookup);
+    while (possibleMoves.length != 0){
+        randomIndex   = ~~(Math.random()*possibleMoves.length);    
+        move          = possibleMoves[randomIndex];
+        bbAndScore    = Agent.prototype.move(bitboard, move, lookup);
+        bitboard      = bbAndScore[0];
+        deltaScore   += bbAndScore[1];
+        bitboard      = Agent.prototype.randomSpawn(bitboard);
+        possibleMoves = Agent.prototype.possibleMoves(bitboard, lookup);
+    };
+    return deltaScore
+}; 
+
+
+Agent.prototype.randomSpawn = function(bitboard){
+    randomNum       = Math.random();
+    value           = randomNum <= 0.9 ? 1n : 2n;
+    zeroCoords      = Agent.prototype.getZeros(bitboard);
+    randomIndex     = ~~(randomNum*zeroCoords.length);
+    col             = zeroCoords[randomIndex][0];
+    row             = zeroCoords[randomIndex][1];
+    collocatedValue = Agent.prototype.collocateCell(value, col, row);
+    return bitboard + collocatedValue;
+};
